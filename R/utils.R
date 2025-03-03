@@ -19,10 +19,12 @@ utils::globalVariables(c("effect", "param"))
 #' @method confint medoutcon
 #'
 #' @export
-confint.medoutcon <- function(object,
-                              parm = seq_len(object$theta),
-                              level = 0.95,
-                              ...) {
+confint.medoutcon <- function(
+  object,
+  parm = seq_len(object$theta),
+  level = 0.95,
+  ...
+) {
   # inference is currently limited to the efficient estimators
   assertthat::assert_that(object$type %in% c("onestep", "tmle"))
 
@@ -30,8 +32,10 @@ confint.medoutcon <- function(object,
   ci_norm_bounds <- c(-1, 1) * abs(stats::qnorm(p = (1 - level) / 2))
 
   # assume continuous outcome if more than two levels in outcome node
-  if (length(unique(object$outcome)) > 2 ||
-      stringr::str_detect(object$param, "direct")) {
+  if (
+    length(unique(object$outcome)) > 2 ||
+      stringr::str_detect(object$param, "direct")
+  ) {
     # NOTE: variance already scaled (i.e., Var(D)/n)
     se_eif <- sqrt(object$var)
 
@@ -51,6 +55,7 @@ confint.medoutcon <- function(object,
   return(ci_out)
 }
 
+
 ###############################################################################
 
 #' Summary for natural/interventional (in)direct effect estimate objects
@@ -69,9 +74,7 @@ confint.medoutcon <- function(object,
 #' @importFrom tibble as_tibble
 #'
 #' @export
-summary.medoutcon <- function(object,
-                              ...,
-                              ci_level = 0.95) {
+summary.medoutcon <- function(object, ..., ci_level = 0.95) {
   # compute confidence interval
   est_with_ci <- stats::confint(object, level = ci_level)
 
@@ -117,7 +120,9 @@ print.medoutcon <- function(x, ...) {
     # TODO: printing specific to counterfactual mean
     message("Counterfactual TSM")
     message(paste0(
-      "Contrast: A = ", x$.contrast[1], ", ",
+      "Contrast: A = ",
+      x$.contrast[1],
+      ", ",
       paste0("M(A = ", x$.contrast[2], ")")
     ))
   } else {
@@ -129,8 +134,12 @@ print.medoutcon <- function(x, ...) {
   message("Estimate: ", round(x_summary$param_est, 3))
   message("Std. Error: ", round(sqrt(x_summary$var_est), 3))
   message(
-    scales::percent(ci_level), " CI: [",
-    round(x_summary$lwr_ci, 3), ", ", round(x_summary$upr_ci, 3), "]"
+    scales::percent(ci_level),
+    " CI: [",
+    round(x_summary$lwr_ci, 3),
+    ", ",
+    round(x_summary$upr_ci, 3),
+    "]"
   )
 }
 
