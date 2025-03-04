@@ -636,10 +636,15 @@ fit_nuisance_v_RCT = function(
       rep(0, nrow(valid_data)),
       valid_data$obs_weights
     ))
+
     data.table::setnames(
       v_data_valid,
       c(w_names, z_names, "A", "M", "V_pseudo", "obs_weights")
     )
+
+    v_data_valid[, `:=`(
+      A = contrast[1]
+    )]
     suppressWarnings(
       v_task_valid <- sl3::sl3_Task$new(
         data = v_data_valid,
@@ -660,6 +665,7 @@ fit_nuisance_v_RCT = function(
       outcome_type = "continuous"
     )
     s_param_fit_pseudo <- learners$train(s_task_train_pseudo)
+
     suppressWarnings(
       s_task_valid_pseudo <- sl3::sl3_Task$new(
         data = v_data_valid,
@@ -737,6 +743,10 @@ fit_nuisance_l_RCT = function(
     l_data_valid,
     c(w_names, z_names, "A", "M", "b_prime", "obs_weights")
   )
+  l_data_valid[, `:=`(
+    A = contrast[1]
+  )]
+
   suppressWarnings(
     l_task_valid <- sl3::sl3_Task$new(
       data = l_data_valid,
