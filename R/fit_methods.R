@@ -432,12 +432,15 @@ fit_nuisance_u_RCT = function(
     u_data_train,
     c(w_names, "A", "M", "U_pseudo", "obs_weights")
   )
-  u_task_train <- sl3::sl3_Task$new(
-    data = u_data_train,
-    weights = "obs_weights",
-    covariates = c("M", "A", w_names),
-    outcome = "U_pseudo",
-    outcome_type = "continuous"
+
+  suppressWarnings(
+    u_task_train <- sl3::sl3_Task$new(
+      data = u_data_train,
+      weights = "obs_weights",
+      covariates = c("M", "A", w_names),
+      outcome = "U_pseudo",
+      outcome_type = "continuous"
+    )
   )
   u_param_fit <- learners$train(u_task_train)
   u_data_valid <- data.table::as.data.table(cbind(
@@ -560,25 +563,29 @@ fit_nuisance_v_RCT = function(
     }
 
     train_data[, `:=`(V_pseudo, v_pseudo_train)]
-    v_task_train <- sl3::sl3_Task$new(
-      data = train_data,
-      weights = "obs_weights",
-      covariates = c("A", w_names),
-      outcome = "V_pseudo",
-      outcome_type = "continuous"
+
+    suppressWarnings(
+      v_task_train <- sl3::sl3_Task$new(
+        data = train_data,
+        weights = "obs_weights",
+        covariates = c("A", w_names),
+        outcome = "V_pseudo",
+        outcome_type = "continuous"
+      )
     )
 
     valid_data[, `:=`(
-      V_pseudo = v_pseudo_valid,
-      A = contrast[1]
+      V_pseudo = v_pseudo_valid
     )]
 
-    v_task_valid <- sl3::sl3_Task$new(
-      data = valid_data,
-      weights = "obs_weights",
-      covariates = c("A", w_names),
-      outcome = "V_pseudo",
-      outcome_type = "continuous"
+    suppressWarnings(
+      v_task_valid <- sl3::sl3_Task$new(
+        data = valid_data,
+        weights = "obs_weights",
+        covariates = c("A", w_names),
+        outcome = "V_pseudo",
+        outcome_type = "continuous"
+     )
     )
     v_param_fit <- learners$train(v_task_train)
     v_valid_pred <- v_param_fit$predict(v_task_valid)
@@ -619,16 +626,18 @@ fit_nuisance_v_RCT = function(
       v_data_train,
       c(w_names, z_names, "A", "M", "V_pseudo", "obs_weights")
     )
-
-    v_task_train <- sl3::sl3_Task$new(
-      data = v_data_train,
-      weights = "obs_weights",
-      covariates = c("A", w_names),
-      outcome = "V_pseudo",
-      outcome_type = "continuous"
+    suppressWarnings(
+      v_task_train <- sl3::sl3_Task$new(
+        data = v_data_train,
+        weights = "obs_weights",
+        covariates = c("A", w_names),
+        outcome = "V_pseudo",
+        outcome_type = "continuous"
+      )
     )
-
     v_param_fit <- learners$train(v_task_train)
+
+
     v_data_valid <- data.table::as.data.table(cbind(
       valid_data[, ..var_names],
       valid_data$A,
@@ -642,9 +651,6 @@ fit_nuisance_v_RCT = function(
       c(w_names, z_names, "A", "M", "V_pseudo", "obs_weights")
     )
 
-    v_data_valid[, `:=`(
-      A = contrast[1]
-    )]
     suppressWarnings(
       v_task_valid <- sl3::sl3_Task$new(
         data = v_data_valid,
@@ -657,12 +663,14 @@ fit_nuisance_v_RCT = function(
     v_valid_pred <- v_param_fit$predict(v_task_valid)
     v_train_pred <- v_param_fit$predict(v_task_train)
 
-    s_task_train_pseudo <- sl3::sl3_Task$new(
-      data = v_data_train,
-      weights = "obs_weights",
-      covariates = c("A", w_names, z_names),
-      outcome = "V_pseudo",
-      outcome_type = "continuous"
+    suppressWarnings(
+      s_task_train_pseudo <- sl3::sl3_Task$new(
+        data = v_data_train,
+        weights = "obs_weights",
+        covariates = c("A", w_names, z_names),
+        outcome = "V_pseudo",
+        outcome_type = "continuous"
+      )
     )
     s_param_fit_pseudo <- learners$train(s_task_train_pseudo)
 
@@ -722,13 +730,14 @@ fit_nuisance_l_RCT = function(
     l_data_train,
     c(w_names, z_names, "A", "M", "b_prime", "obs_weights")
   )
-
-  l_task_train <- sl3::sl3_Task$new(
-    data = l_data_train,
-    weights = "obs_weights",
-    covariates = c("A", w_names, z_names, 'M'),
-    outcome = "b_prime",
-    outcome_type = "continuous"
+  suppressWarnings(
+    l_task_train <- sl3::sl3_Task$new(
+      data = l_data_train,
+      weights = "obs_weights",
+      covariates = c("A", w_names, z_names, 'M'),
+      outcome = "b_prime",
+      outcome_type = "continuous"
+    )
   )
 
   l_param_fit <- learners$train(l_task_train)
@@ -743,9 +752,6 @@ fit_nuisance_l_RCT = function(
     l_data_valid,
     c(w_names, z_names, "A", "M", "b_prime", "obs_weights")
   )
-  l_data_valid[, `:=`(
-    A = contrast[1]
-  )]
 
   suppressWarnings(
     l_task_valid <- sl3::sl3_Task$new(
