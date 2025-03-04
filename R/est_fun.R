@@ -179,17 +179,15 @@ cv_eif_RCT = function(
   c_star <- (q_star_M_natural / r_prime_M_natural)
 
   eif_y <- ipw_a_prime *
-    c_star /
-    mean(ipw_a_prime * c_star) *
+    c_star *
     (valid_data[R == 1, Y] - b_prime)
-  eif_u <- ipw_a_star /
-    mean(ipw_a_star) *
+  eif_u <- ipw_a_star *
     u_int_eif *
     (valid_data[R == 1, M] - q_star_M_one)
   if (effect_type == "shift_k") {
-    eif_v <- ipw_a_prime / mean(ipw_a_prime) * (v_out$v_pseudo - v_prime)
+    eif_v <- ipw_a_prime * (v_out$v_pseudo - v_prime)
   } else if (effect_type == "shift_k_order") {
-    eif_v <- ipw_a_prime / mean(ipw_a_prime) * (v_out$s_pseudo - v_prime)
+    eif_v <- ipw_a_prime * (v_out$s_pseudo - v_prime)
   }
 
   if (effect_type == "Y_1") {
@@ -197,8 +195,7 @@ cv_eif_RCT = function(
   }
 
   if (effect_type == "Y_1") {
-    eif <- ipw_a_prime /
-      mean(ipw_a_prime) *
+    eif <- ipw_a_prime *
       (valid_data[R == 1, Y] - b_prime) +
       b_prime
     eif_save = NULL
@@ -218,8 +215,7 @@ cv_eif_RCT = function(
     )
     l_prime <- l_out$l_pred
     eif_ad = ipw_a_prime *
-      c_star /
-      mean(ipw_a_prime * c_star) *
+      c_star *
       (b_prime - l_prime)
     eif_save = eif_v + eif_ad + v_prime
     eif <- eif_y + eif_u + eif_v + eif_ad + v_prime
