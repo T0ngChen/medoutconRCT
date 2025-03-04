@@ -158,14 +158,15 @@ cv_eif_RCT = function(
 
     valid_data_m_interv[, `:=`(M = m_val, A = contrast[1], U_pseudo = u_prime)]
 
-    u_task_valid_m_interv <- sl3::sl3_Task$new(
-      data = valid_data_m_interv,
-      weights = "obs_weights",
-      covariates = c("M", "A", w_names),
-      outcome = "U_pseudo",
-      outcome_type = "continuous"
+    suppressWarnings(
+      u_task_valid_m_interv <- sl3::sl3_Task$new(
+        data = valid_data_m_interv,
+        weights = "obs_weights",
+        covariates = c("M", "A", w_names),
+        outcome = "U_pseudo",
+        outcome_type = "continuous"
+      )
     )
-
     out_valid <- u_out[["u_fit"]]$predict(u_task_valid_m_interv)
     return(out_valid)
   })
@@ -684,6 +685,10 @@ est_tml_RCT <- function(
     c_star_M_natural <- q_star_M_natural / r_prime_M_natural
     c_star_M_one <- q_star_M_one / r_prime_M_one
     c_star_M_zero <- (1 - q_star_M_one) / (1 - r_prime_M_one)
+    b_score = data[R == 1, two_phase_weights] *
+      ipw_prime *
+      c_star_M_natural *
+      (data[R == 1, Y] - b_prime_M_natural)
 
     if (effect_type == "shift_k") {
       # compute updated substitution estimator and prepare for tilting regression
