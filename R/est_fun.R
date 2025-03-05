@@ -179,16 +179,15 @@ cv_eif_RCT = function(
   # q(m_k|a^star)/r(m_k|a^prime)
   c_star <- (q_star_M_natural / r_prime_M_natural)
 
-  eif_y <- ipw_a_prime *
-    c_star *
+  eif_y <- ipw_a_prime * c_star / mean(ipw_a_prime * c_star) *
     (valid_data[R == 1, Y] - b_prime)
-  eif_u <- ipw_a_star *
+  eif_u <- ipw_a_star / mean(ipw_a_star) *
     u_int_eif *
     (valid_data[R == 1, M] - q_star_M_one)
   if (effect_type == "shift_k") {
-    eif_v <- ipw_a_prime * (v_out$v_pseudo - v_prime)
+    eif_v <- ipw_a_prime / mean(ipw_a_prime) * (v_out$v_pseudo - v_prime)
   } else if (effect_type == "shift_k_order") {
-    eif_v <- ipw_a_prime * (v_out$s_pseudo - v_prime)
+    eif_v <- ipw_a_prime / mean(ipw_a_prime) * (v_out$s_pseudo - v_prime)
   }
 
   if (effect_type == "Y_1") {
@@ -196,7 +195,7 @@ cv_eif_RCT = function(
   }
 
   if (effect_type == "Y_1") {
-    eif <- ipw_a_prime *
+    eif <- ipw_a_prime / mean(ipw_a_prime) *
       (valid_data[R == 1, Y] - b_prime) +
       b_prime
     eif_save = NULL
@@ -215,8 +214,7 @@ cv_eif_RCT = function(
       effect_type = effect_type
     )
     l_prime <- l_out$l_pred
-    eif_ad = ipw_a_prime *
-      c_star *
+    eif_ad = ipw_a_prime * c_star / mean(ipw_a_prime * c_star) *
       (b_prime - l_prime)
     eif_save = eif_v + eif_ad + v_prime
     eif <- eif_y + eif_u + eif_v + eif_ad + v_prime
@@ -739,16 +737,18 @@ est_tml_RCT <- function(
     }
 
     suppressWarnings(
-      b_tilt_fit <- glm2::glm2(
-        stats::as.formula("y_scaled ~ offset(b_prime_logit)"),
-        data = data.table::as.data.table(list(
-          y_scaled = data[R == 1, Y],
-          b_prime_logit = b_prime_M_natural_logit
-        )),
-        weights = weights_b_tilt,
-        family = stats::binomial(),
-        start = 0
-      )
+      b_tilt_fit <- glm(data[R == 1, Y] ~ 1, offset = b_prime_M_natural_logit, family = "binomial",
+                        subset = (data$A == contrast[1]), weights = weights_b_tilt) # / mean(weights_b_tilt)
+      #b_tilt_fit <- glm2::glm2(
+      #  stats::as.formula("y_scaled ~ -1 + offset(b_prime_logit)"),
+      #  data = data.table::as.data.table(list(
+      #    y_scaled = data[R == 1, Y],
+      #    b_prime_logit = b_prime_M_natural_logit
+      #  )),
+      #  weights = weights_b_tilt,
+      #  family = stats::binomial(),
+      #  start = 0
+      #)
     )
     v_prime_tmle = unname(stats::predict(b_tilt_fit, type = "response"))
   }
