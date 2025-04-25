@@ -271,8 +271,6 @@ medoutconRCT = function(
 
   de_theta_est <- est_params_out[[1]]$theta - est_params[[1]]$theta
   de_eif_est <- est_params_out[[1]]$eif - est_params[[1]]$eif
-  de_eif_org <- est_params_out[[1]]$eif_est_rescaled -
-    est_params[[1]]$eif_est_rescaled
   de_var_est <- stats::var(de_eif_est) / nrow(data)
   de_est_out <- list(
     theta = de_theta_est,
@@ -502,8 +500,6 @@ medoutconPall = function(
 
   de_theta_est <- est_params_out[[1]]$theta - est_params[[1]]$theta
   de_eif_est <- est_params_out[[1]]$eif - est_params[[1]]$eif
-  de_eif_org <- est_params_out[[1]]$eif_est_rescaled -
-    est_params[[1]]$eif_est_rescaled
   de_var_est <- stats::var(de_eif_est) / nrow(data)
   de_est_out <- list(
     theta = de_theta_est,

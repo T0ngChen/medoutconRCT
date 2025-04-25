@@ -1,12 +1,13 @@
 Package: medoutconRCT
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: Estimating interventional effects mapped to a target trial using causal machine learning
+Version: 0.1.0
+Authors@R: c( 
+    person("Tong", "Chen", , "tong.chen@mcri.edu.au", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-2751-2412")),
+    person("Margarita", "Moreno-Betancur", , "margarita.moreno@mcri.edu.au", role = c("aut"))       
+    )
+Description: An R Package implementing causal machine learning estimators for causal mediation analysis using interventional effects defined by mapping to a target trial assessing hypothetical mediator interventions.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
