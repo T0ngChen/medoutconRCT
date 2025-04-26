@@ -2,7 +2,7 @@
 % Please edit documentation in R/medoutconRCT.R
 \name{medoutconRCT}
 \alias{medoutconRCT}
-\title{Title .}
+\title{Interventional (in)direct effects for estimating estimands \eqn{\theta_k} and \eqn{\theta'_k} using causal ML}
 \usage{
 medoutconRCT(
   W,
@@ -10,10 +10,7 @@ medoutconRCT(
   Z,
   M,
   Y,
-  R = rep(1, length(Y)),
-  obs_weights = rep(1, length(Y)),
-  svy_weights = NULL,
-  two_phase_weights = rep(1, length(Y)),
+  L,
   contrast = c(1, 0),
   g_learners = sl3::Lrnr_glm_fast$new(),
   h_learners = sl3::Lrnr_glm_fast$new(),
@@ -22,55 +19,66 @@ medoutconRCT(
   r_learners = sl3::Lrnr_glm_fast$new(),
   u_learners = sl3::Lrnr_hal9001$new(),
   v_learners = sl3::Lrnr_hal9001$new(),
+  l_learners = sl3::Lrnr_hal9001$new(),
   d_learners = sl3::Lrnr_glm_fast$new(),
   estimator = c("tmle", "onestep"),
-  estimator_args = list(cv_folds = 5L, max_iter = 5L, tiltmod_tol = 5),
-  g_bounds = c(0.01, 0.99)
+  estimator_args = list(cv_folds = 5L, cv_strat = FALSE, strat_pmin = 0.1, max_iter = 5L,
+    tiltmod_tol = 5),
+  g_bounds = c(0.005, 0.995)
 )
 }
 \arguments{
-\item{W}{.}
+\item{W}{A data.frame or matrix of baseline covariates (confounders).}
 
-\item{A}{.}
+\item{A}{A vector of the binary exposure/treatment assignments.}
 
-\item{Z}{.}
+\item{Z}{A numeric vector, matrix, or data frame of intermediate confounders. When estimating \eqn{\theta'_k}, they are the causal ancestors of mediators.}
 
-\item{M}{.}
+\item{M}{A vector of binary mediator of interest.}
 
-\item{Y}{.}
+\item{Y}{Outcome vector}
 
-\item{R}{.}
+\item{L}{A numeric vector, matrix, or data frame containing variables that are causal descendants of the mediators of interest. This arugment is only relevant when estimating \eqn{\theta'_k}.}
 
-\item{obs_weights}{.}
+\item{contrast}{Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).}
 
-\item{svy_weights}{.}
+\item{g_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters g}
 
-\item{two_phase_weights}{.}
+\item{h_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.}
 
-\item{contrast}{.}
+\item{b_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating outcome regression b()}
 
-\item{g_learners}{.}
+\item{q_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters q}
 
-\item{h_learners}{.}
+\item{r_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters r}
 
-\item{b_learners}{.}
+\item{u_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters u}
 
-\item{q_learners}{.}
+\item{v_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters v}
 
-\item{r_learners}{.}
+\item{l_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.}
 
-\item{u_learners}{.}
+\item{d_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.}
 
-\item{v_learners}{.}
+\item{estimator}{Character string, either "tmle" or "onestep", specifying the estimator.}
 
-\item{d_learners}{.}
+\item{estimator_args}{estimator_args List of control parameters for the estimator:
+\itemize{
+\item cv_folds: integer, number of cross-validation folds
+\item cv_strat: logical, whether to stratify folds by outcome
+\item strat_pmin: numeric, minimum stratum proportion
+\item max_iter: integer, maximum TMLE updating iterations
+\item tiltmod_tol: numeric, convergence tolerance for tilting
+}}
 
-\item{estimator}{.}
-
-\item{estimator_args}{.}
-
-\item{g_bounds}{.}
+\item{g_bounds}{A numeric vector specifying the upper and lower bound for the estimated propensity scores.}
 }
 \description{
-Title .
+Interventional (in)direct effects for estimating estimands \eqn{\theta_k} and \eqn{\theta'_k} using causal ML
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/est_fun.R
 \name{est_tml_RCT}
 \alias{est_tml_RCT}
-\title{Title}
+\title{TMLE}
 \usage{
 est_tml_RCT(
   data,
@@ -14,57 +14,75 @@ est_tml_RCT(
   r_learners,
   u_learners,
   v_learners,
+  l_learners,
   d_learners,
   w_names,
   z_names,
+  l_names,
   y_bounds,
-  g_bounds = c(0.01, 0.99),
-  effect_type = c("p_all", "p_i", "p_hat", "Y_1"),
+  g_bounds = c(0.005, 0.995),
+  effect_type = c("shift_k", "shift_k_order", "Y_1"),
   svy_weights = NULL,
   cv_folds = 5L,
+  cv_strat = FALSE,
+  strat_pmin = 0.1,
   max_iter = 5L,
   tiltmod_tol = 5
 )
 }
 \arguments{
-\item{data}{.}
+\item{data}{A data.table containing all variables}
 
-\item{contrast}{.}
+\item{contrast}{Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).}
 
-\item{g_learners}{.}
+\item{g_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters g}
 
-\item{h_learners}{.}
+\item{h_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.}
 
-\item{b_learners}{.}
+\item{b_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating outcome regression b()}
 
-\item{q_learners}{.}
+\item{q_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters q}
 
-\item{r_learners}{.}
+\item{r_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters r}
 
-\item{u_learners}{.}
+\item{u_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters u}
 
-\item{v_learners}{.}
+\item{v_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+This learner is used for estimating nuisance parameters v}
 
-\item{d_learners}{.}
+\item{l_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.}
 
-\item{w_names}{.}
+\item{d_learners}{A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.}
 
-\item{z_names}{.}
+\item{w_names}{Character vector of column names for W}
 
-\item{y_bounds}{.}
+\item{z_names}{Character vector of column names for Z}
 
-\item{g_bounds}{.}
+\item{l_names}{Character vector of column names for L}
 
-\item{effect_type}{.}
+\item{y_bounds}{A numeric vector specifying the upper and lower bound for the outcome Y.}
+
+\item{g_bounds}{A numeric vector specifying the upper and lower bound for the estimated propensity scores.}
+
+\item{effect_type}{Character string specifying the estimand to compute.}
 
 \item{svy_weights}{.}
 
-\item{cv_folds}{.}
+\item{cv_folds}{Value specifying the number of folds to be created for cross-validation.}
 
-\item{max_iter}{.}
+\item{cv_strat}{Logical, indicating whether to perform stratified cross-fitting.}
 
-\item{tiltmod_tol}{.}
+\item{strat_pmin}{Stratified cross-fitting will be used if the outcome prevalence is below this threshold}
+
+\item{max_iter}{Integer, maximum TMLE updating iterations}
+
+\item{tiltmod_tol}{Numeric, convergence tolerance for tilting}
 }
 \description{
-Title
+TMLE
 }

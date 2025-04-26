@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{print.medoutcon}
 \alias{print.medoutcon}
-\title{Print method for natural/interventional (in)direct effect estimate objects}
+\title{Print method for natural/interventional (in)direct effect estimate objects (This function is directly from the medoutcon package)}
 \usage{
 \method{print}{medoutcon}(x, ...)
 }
@@ -14,3 +14,4 @@
 \description{
 The \code{print} method for objects of class \code{medoutcon}.
 }
+\keyword{internal}

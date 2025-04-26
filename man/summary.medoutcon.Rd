@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{summary.medoutcon}
 \alias{summary.medoutcon}
-\title{Summary for natural/interventional (in)direct effect estimate objects}
+\title{Summary for natural/interventional (in)direct effect estimate objects (This function is directly from the medoutcon package)}
 \usage{
 \method{summary}{medoutcon}(object, ..., ci_level = 0.95)
 }
@@ -18,3 +18,4 @@ interval to be computed.}
 \description{
 Print a convenient summary for objects of \code{S3} class \code{medoutcon}.
 }
+\keyword{internal}

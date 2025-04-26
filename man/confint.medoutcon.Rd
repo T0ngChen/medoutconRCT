@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{confint.medoutcon}
 \alias{confint.medoutcon}
-\title{Confidence intervals for natural/interventional (in)direct effect estimates}
+\title{Confidence intervals for natural/interventional (in)direct effect estimates (This function is directly from the medoutcon package)}
 \usage{
 \method{confint}{medoutcon}(object, parm = seq_len(object$theta), level = 0.95, ...)
 }
@@ -22,3 +22,4 @@ interval to be computed.}
 Compute confidence intervals for objects of class \code{medoutcon}, which
 contain estimates produced by \code{\link{medoutcon}}.
 }
+\keyword{internal}

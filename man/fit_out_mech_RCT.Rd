@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_methods.R
 \name{fit_out_mech_RCT}
 \alias{fit_out_mech_RCT}
-\title{Title}
+\title{Fit outcome regression}
 \usage{
 fit_out_mech_RCT(
   train_data,
@@ -10,22 +10,27 @@ fit_out_mech_RCT(
   contrast,
   learners,
   z_names,
-  w_names
+  w_names,
+  l_names
 )
 }
 \arguments{
-\item{train_data}{.}
+\item{train_data}{A data.table containing the training data}
 
-\item{valid_data}{.}
+\item{valid_data}{A data.table containing the validation data}
 
-\item{contrast}{.}
+\item{contrast}{Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).}
 
-\item{learners}{.}
+\item{learners}{\code{\link[sl3]{Stack}}, or other learner class (inheriting
+from \code{\link[sl3]{Lrnr_base}}), containing a set of learners from
+\pkg{sl3}}
 
-\item{z_names}{.}
+\item{z_names}{A character vector of the names of the columns of Z}
 
-\item{w_names}{.}
+\item{w_names}{A character vector of the names of the columns of W}
+
+\item{l_names}{A character vector of the names of the columns of L}
 }
 \description{
-Title
+Fit outcome regression
 }

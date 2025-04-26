@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{bound_propensity}
 \alias{bound_propensity}
-\title{Bounding propensity scores}
+\title{Bounding propensity scores (This function is directly from the medoutcon package)}
 \usage{
 bound_propensity(vals, bounds = c(0.001, 0.999))
 }
 \arguments{
-\item{vals}{A \code{numeric} vector of values in the interval \link{0, 1}.}
+\item{vals}{A \code{numeric} vector of values in the interval \code{0, 1}.}
 
 \item{bounds}{A \code{numeric} vector containing two values, the first being
 the minimum allowable value and the second being the maximum allowable for

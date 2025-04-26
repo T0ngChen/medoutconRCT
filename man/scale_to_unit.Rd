@@ -2,15 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{scale_to_unit}
 \alias{scale_to_unit}
-\title{Scale values to the unit interval}
+\title{Scale values to the unit interval (This function is directly from the medoutcon package)}
 \usage{
 scale_to_unit(vals)
 }
 \arguments{
 \item{vals}{A \code{numeric} vector of values to be scaled into the closed
-interval \link{0, 1}.}
+interval \code{0, 1}.}
 }
 \description{
-Scale values to the unit interval
+Scale values to the unit interval (This function is directly from the medoutcon package)
 }
 \keyword{internal}

@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{bound_precision}
 \alias{bound_precision}
-\title{Bounding to numerical precision}
+\title{Bounding to numerical precision (This function is directly from the medoutcon package)}
 \usage{
 bound_precision(vals, tol = 1e-06)
 }
 \arguments{
-\item{vals}{A \code{numeric} vector of values in the unit interval \link{0, 1}.}
+\item{vals}{A \code{numeric} vector of values in the unit interval \code{0, 1}.}
 
 \item{tol}{A \code{numeric} indicating the tolerance limit to which extreme
 values should be truncated. Realizations of \code{val} less than \code{tol}
