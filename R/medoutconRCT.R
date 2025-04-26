@@ -35,6 +35,8 @@
 #' @importFrom data.table as.data.table setnames set
 #' @importFrom sl3 Lrnr_glm_fast Lrnr_hal9001
 #' @importFrom stats var
+#'
+#' @export
 medoutconRCT = function(
   W,
   A,
@@ -327,6 +329,8 @@ medoutconRCT = function(
 #' @importFrom data.table as.data.table setnames set
 #' @importFrom sl3 Lrnr_glm_fast Lrnr_hal9001
 #' @importFrom stats var
+#'
+#' @export
 medoutconPall = function(
   W,
   A,
