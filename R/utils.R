@@ -1,6 +1,7 @@
 utils::globalVariables(c("effect", "param"))
 
-#' Confidence intervals for natural/interventional (in)direct effect estimates
+
+#' Confidence intervals for natural/interventional (in)direct effect estimates (This function is directly from the medoutcon package)
 #'
 #' Compute confidence intervals for objects of class \code{medoutcon}, which
 #' contain estimates produced by \code{\link{medoutcon}}.
@@ -18,7 +19,7 @@ utils::globalVariables(c("effect", "param"))
 #'
 #' @method confint medoutcon
 #'
-#' @export
+#' @keywords internal
 confint.medoutcon <- function(
   object,
   parm = seq_len(object$theta),
@@ -58,7 +59,7 @@ confint.medoutcon <- function(
 
 ###############################################################################
 
-#' Summary for natural/interventional (in)direct effect estimate objects
+#' Summary for natural/interventional (in)direct effect estimate objects (This function is directly from the medoutcon package)
 #'
 #' Print a convenient summary for objects of \code{S3} class \code{medoutcon}.
 #'
@@ -73,7 +74,7 @@ confint.medoutcon <- function(
 #' @importFrom stats confint
 #' @importFrom tibble as_tibble
 #'
-#' @export
+#' @keywords internal
 summary.medoutcon <- function(object, ..., ci_level = 0.95) {
   # compute confidence interval
   est_with_ci <- stats::confint(object, level = ci_level)
@@ -96,7 +97,7 @@ summary.medoutcon <- function(object, ..., ci_level = 0.95) {
 
 ###############################################################################
 
-#' Print method for natural/interventional (in)direct effect estimate objects
+#' Print method for natural/interventional (in)direct effect estimate objects (This function is directly from the medoutcon package)
 #'
 #' The \code{print} method for objects of class \code{medoutcon}.
 #'
@@ -109,7 +110,7 @@ summary.medoutcon <- function(object, ..., ci_level = 0.95) {
 #' @importFrom scales percent
 #' @importFrom stringr str_detect str_split str_to_title
 #'
-#' @export
+#' @keywords internal
 print.medoutcon <- function(x, ...) {
   # get summary, including confidence interval
   x_summary <- summary(x)
@@ -145,12 +146,12 @@ print.medoutcon <- function(x, ...) {
 
 ###############################################################################
 
-#' Bounding to numerical precision
+#' Bounding to numerical precision (This function is directly from the medoutcon package)
 #'
 #' Bounds extreme values to a specified tolerance level, for use with sensitive
 #' quantities that must be transformed, e.g., via \code{\link[stats]{qlogis}}.
 #'
-#' @param vals A \code{numeric} vector of values in the unit interval [0, 1].
+#' @param vals A \code{numeric} vector of values in the unit interval \code{0, 1}.
 #' @param tol A \code{numeric} indicating the tolerance limit to which extreme
 #'  values should be truncated. Realizations of \code{val} less than \code{tol}
 #'  are truncated to \code{tol} while those greater than (1 - \code{tol}) are
@@ -167,11 +168,11 @@ bound_precision <- function(vals, tol = 1e-6) {
 
 ###############################################################################
 
-#' Bounding propensity scores
+#' Bounding propensity scores (This function is directly from the medoutcon package)
 #'
 #' Bounds estimated propensity score values to be within a specified range.
 #'
-#' @param vals A \code{numeric} vector of values in the interval [0, 1].
+#' @param vals A \code{numeric} vector of values in the interval \code{0, 1}.
 #' @param bounds A \code{numeric} vector containing two values, the first being
 #'  the minimum allowable value and the second being the maximum allowable for
 #'  values appearing in the vector \code{vals} (the previous argument).
@@ -188,10 +189,10 @@ bound_propensity <- function(vals, bounds = c(0.001, 0.999)) {
 
 ###############################################################################
 
-#' Scale values to the unit interval
+#' Scale values to the unit interval (This function is directly from the medoutcon package)
 #'
 #' @param vals A \code{numeric} vector of values to be scaled into the closed
-#'  interval [0, 1].
+#'  interval \code{0, 1}.
 #'
 #' @keywords internal
 scale_to_unit <- function(vals) {
@@ -201,10 +202,10 @@ scale_to_unit <- function(vals) {
 
 ###############################################################################
 
-#' Scale values from the unit interval to their original scale
+#' Scale values from the unit interval to their original scale (This function is directly from the medoutcon package)
 #'
 #' @param scaled_vals A \code{numeric} vector of values scaled to lie in the
-#'  closed interval [0, 1] by use of \code{\link{scale_to_unit}}.
+#'  closed interval \code{0, 1} by use of \code{\link{scale_to_unit}}.
 #' @param max_orig The maximum of the values on the original scale.
 #' @param min_orig The minimum of the values on the original scale.
 #'

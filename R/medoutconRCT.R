@@ -1,28 +1,35 @@
-#' Title .
+#' Interventional (in)direct effects for estimating estimands \eqn{\theta_k} and \eqn{\theta'_k} using causal ML
 #'
-#' @param W .
-#' @param A .
-#' @param Z .
-#' @param M .
-#' @param L .
-#' @param Y .
-#' @param R .
-#' @param obs_weights .
-#' @param svy_weights .
-#' @param two_phase_weights .
-#' @param contrast .
-#' @param g_learners .
-#' @param h_learners .
-#' @param b_learners .
-#' @param q_learners .
-#' @param r_learners .
-#' @param u_learners .
-#' @param v_learners .
-#' @param l_learners .
-#' @param d_learners .
-#' @param estimator .
-#' @param estimator_args .
-#' @param g_bounds .
+#' @param W A data.frame or matrix of baseline covariates (confounders).
+#' @param A A vector of the binary exposure/treatment assignments.
+#' @param Z A numeric vector, matrix, or data frame of intermediate confounders. When estimating \eqn{\theta'_k}, they are the causal ancestors of mediators.
+#' @param M A vector of binary mediator of interest.
+#' @param L A numeric vector, matrix, or data frame containing variables that are causal descendants of the mediators of interest. This arugment is only relevant when estimating \eqn{\theta'_k}.
+#' @param Y Outcome vector
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param g_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters g
+#' @param h_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param b_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating outcome regression b()
+#' @param q_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters q
+#' @param r_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters r
+#' @param u_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters u
+#' @param v_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters v
+#' @param l_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param d_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param estimator Character string, either "tmle" or "onestep", specifying the estimator.
+#' @param estimator_args estimator_args List of control parameters for the estimator:
+#'   - cv_folds: integer, number of cross-validation folds
+#'   - cv_strat: logical, whether to stratify folds by outcome
+#'   - strat_pmin: numeric, minimum stratum proportion
+#'   - max_iter: integer, maximum TMLE updating iterations
+#'   - tiltmod_tol: numeric, convergence tolerance for tilting
+#' @param g_bounds A numeric vector specifying the upper and lower bound for the estimated propensity scores.
 #'
 #'
 #' @importFrom data.table as.data.table setnames set
@@ -35,10 +42,6 @@ medoutconRCT = function(
   M,
   Y,
   L,
-  R = rep(1, length(Y)),
-  obs_weights = rep(1, length(Y)),
-  svy_weights = NULL,
-  two_phase_weights = rep(1, length(Y)),
   contrast = c(1, 0),
   g_learners = sl3::Lrnr_glm_fast$new(),
   h_learners = sl3::Lrnr_glm_fast$new(),
@@ -59,6 +62,11 @@ medoutconRCT = function(
   ),
   g_bounds = c(0.005, 0.995)
 ) {
+  # set default for two-phase sampling parameters in medoutcon (unused)
+  R = rep(1, length(Y))
+  obs_weights = rep(1, length(Y))
+  svy_weights = NULL
+  two_phase_weights = rep(1, length(Y))
   # set defaults
   estimator <- match.arg(estimator)
   estimator_args <- unlist(estimator_args, recursive = FALSE)
@@ -285,18 +293,46 @@ medoutconRCT = function(
 }
 
 
+#' Interventional (in)direct effects for estimating estimands \eqn{\theta_{all}} using causal ML
+#'
+#' @param W A data.frame or matrix of baseline covariates (confounders).
+#' @param A A vector of the binary exposure/treatment assignments.
+#' @param M A vector of binary mediator of interest.
+#' @param Y Outcome vector
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param g_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters g
+#' @param h_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param b_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating outcome regression b()
+#' @param q_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters q
+#' @param r_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters r
+#' @param u_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters u
+#' @param v_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters v
+#' @param d_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param estimator Character string, either "tmle" or "onestep", specifying the estimator.
+#' @param estimator_args estimator_args List of control parameters for the estimator:
+#'   - cv_folds: integer, number of cross-validation folds
+#'   - cv_strat: logical, whether to stratify folds by outcome
+#'   - strat_pmin: numeric, minimum stratum proportion
+#'   - max_iter: integer, maximum TMLE updating iterations
+#'   - tiltmod_tol: numeric, convergence tolerance for tilting
+#' @param g_bounds A numeric vector specifying the upper and lower bound for the estimated propensity scores.
+#'
+#'
+#' @importFrom data.table as.data.table setnames set
+#' @importFrom sl3 Lrnr_glm_fast Lrnr_hal9001
+#' @importFrom stats var
 medoutconPall = function(
   W,
   A,
-  Z = NULL,
   M,
   Y,
-  L = NULL,
-  R = rep(1, length(Y)),
-  obs_weights = rep(1, length(Y)),
-  svy_weights = NULL,
-  two_phase_weights = rep(1, length(Y)),
-  contrast = NULL,
+  contrast = c(1, 0),
   g_learners = sl3::Lrnr_glm_fast$new(),
   h_learners = sl3::Lrnr_glm_fast$new(),
   b_learners = sl3::Lrnr_glm_fast$new(),
@@ -315,6 +351,11 @@ medoutconPall = function(
   ),
   g_bounds = c(0.005, 0.995)
 ) {
+  # set default for two-phase sampling parameters in medoutcon (unused)
+  R = rep(1, length(Y))
+  obs_weights = rep(1, length(Y))
+  svy_weights = NULL
+  two_phase_weights = rep(1, length(Y))
   # set defaults
   estimator <- match.arg(estimator)
   estimator_args <- unlist(estimator_args, recursive = FALSE)
@@ -431,6 +472,7 @@ medoutconPall = function(
     class(est_out) <- "medoutcon"
     return(est_out)
   })
+  l_learners = sl3::Lrnr_hal9001$new()
 
   # calculate E[Y_1]
   est_params_out <- lapply(contrast_grid, function(contrast) {

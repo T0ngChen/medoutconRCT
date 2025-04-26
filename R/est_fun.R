@@ -1,25 +1,31 @@
 utils::globalVariables(c("..w_names", "A", "M", "Y", "R", "v_prime"))
 
 
-#' Title
+#' EIF for the different estimands
 #'
-#' @param fold .
-#' @param data_in .
-#' @param contrast .
-#' @param g_learners .
-#' @param h_learners .
-#' @param b_learners .
-#' @param q_learners .
-#' @param r_learners .
-#' @param u_learners .
-#' @param v_learners .
-#' @param d_learners .
-#' @param l_learners .
-#' @param effect_type .
-#' @param l_names .
-#' @param w_names .
-#' @param z_names .
-#' @param g_bounds .
+#' @param fold Integer index of the cross‐validation fold
+#' @param data_in A data.table containing all variables
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param g_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters g
+#' @param h_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param b_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating outcome regression b()
+#' @param q_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters q
+#' @param r_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters r
+#' @param u_learners  A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters u
+#' @param v_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters v
+#' @param d_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param l_learners  A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param effect_type Character string specifying the estimand to compute.
+#' @param l_names Character vector of column names for L
+#' @param w_names Character vector of column names for W
+#' @param z_names Character vector of column names for Z
+#' @param g_bounds A numeric vector specifying the upper and lower bound for the estimated propensity scores.
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom data.table data.table copy
@@ -179,9 +185,12 @@ cv_eif_RCT = function(
   # q(m_k|a^star)/r(m_k|a^prime)
   c_star <- (q_star_M_natural / r_prime_M_natural)
 
-  eif_y <- ipw_a_prime * c_star / mean(ipw_a_prime * c_star) *
+  eif_y <- ipw_a_prime *
+    c_star /
+    mean(ipw_a_prime * c_star) *
     (valid_data[R == 1, Y] - b_prime)
-  eif_u <- ipw_a_star / mean(ipw_a_star) *
+  eif_u <- ipw_a_star /
+    mean(ipw_a_star) *
     u_int_eif *
     (valid_data[R == 1, M] - q_star_M_one)
   if (effect_type == "shift_k") {
@@ -195,7 +204,8 @@ cv_eif_RCT = function(
   }
 
   if (effect_type == "Y_1") {
-    eif <- ipw_a_prime / mean(ipw_a_prime) *
+    eif <- ipw_a_prime /
+      mean(ipw_a_prime) *
       (valid_data[R == 1, Y] - b_prime) +
       b_prime
     eif_save = NULL
@@ -214,7 +224,9 @@ cv_eif_RCT = function(
       effect_type = effect_type
     )
     l_prime <- l_out$l_pred
-    eif_ad = ipw_a_prime * c_star / mean(ipw_a_prime * c_star) *
+    eif_ad = ipw_a_prime *
+      c_star /
+      mean(ipw_a_prime * c_star) *
       (b_prime - l_prime)
     eif_save = eif_v + eif_ad + v_prime
     eif <- eif_y + eif_u + eif_v + eif_ad + v_prime
@@ -239,13 +251,13 @@ cv_eif_RCT = function(
       w_names = w_names
     )
     centered_eif_pred <- d_out$d_pred
-    full_eif <- two_phase_eif(
-      R = valid_data$R,
-      two_phase_weights = valid_data$two_phase_weights,
-      eif = centered_eif,
-      eif_predictions = centered_eif_pred,
-      plugin_est = plugin_est
-    )
+    #full_eif <- two_phase_eif(
+    #  R = valid_data$R,
+    #  two_phase_weights = valid_data$two_phase_weights,
+    #  eif = centered_eif,
+    #  eif_predictions = centered_eif_pred,
+    #  plugin_est = plugin_est
+    #)
   } else {
     full_eif <- eif
     centered_eif_pred <- NA
@@ -276,27 +288,35 @@ cv_eif_RCT = function(
 }
 
 
-#' Title
+#' One-step estimator
 #'
-#' @param data .
-#' @param contrast .
-#' @param g_learners .
-#' @param h_learners .
-#' @param b_learners .
-#' @param q_learners .
-#' @param r_learners .
-#' @param u_learners .
-#' @param v_learners .
-#' @param l_learners .
-#' @param d_learners .
-#' @param w_names .
-#' @param z_names .
-#' @param l_names .
-#' @param y_bounds .
-#' @param g_bounds .
-#' @param effect_type .
+#' @param data A data.table containing all variables
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param g_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters g
+#' @param h_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param b_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating outcome regression b()
+#' @param q_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters q
+#' @param r_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters r
+#' @param u_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters u
+#' @param v_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters v
+#' @param l_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param d_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param w_names Character vector of column names for W
+#' @param z_names Character vector of column names for Z
+#' @param l_names Character vector of column names for L
+#' @param y_bounds A numeric vector specifying the upper and lower bound for the outcome Y.
+#' @param g_bounds A numeric vector specifying the upper and lower bound for the estimated propensity scores.
+#' @param effect_type Character string specifying the estimand to compute.
 #' @param svy_weights .
-#' @param cv_folds .
+#' @param cv_folds Value specifying the number of folds to be created for cross-validation.
+#' @param cv_strat Logical, indicating whether to perform stratified cross-fitting.
+#' @param strat_pmin Stratified cross-fitting will be used if the outcome prevalence is below this threshold
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom stats var weighted.mean
@@ -405,29 +425,38 @@ est_plugin <- function(v_pred) {
 }
 
 
-#' Title
+#' TMLE
 #'
-#' @param data .
-#' @param contrast .
-#' @param g_learners .
-#' @param h_learners .
-#' @param b_learners .
-#' @param q_learners .
-#' @param r_learners .
-#' @param u_learners .
-#' @param v_learners .
-#' @param l_learners .
-#' @param d_learners .
-#' @param w_names .
-#' @param z_names .
-#' @param l_names .
-#' @param y_bounds .
-#' @param g_bounds .
-#' @param effect_type .
+#' @param data A data.table containing all variables
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param g_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters g
+#' @param h_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param b_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating outcome regression b()
+#' @param q_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters q
+#' @param r_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters r
+#' @param u_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters u
+#' @param v_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' This learner is used for estimating nuisance parameters v
+#' @param l_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param d_learners A learner object. It is either an \code{\link[sl3]{Stack}} or any class inheriting from \code{\link[sl3]{Lrnr_base}} that contains one or more instantiated \pkg{sl3} learners.
+#' @param w_names Character vector of column names for W
+#' @param z_names Character vector of column names for Z
+#' @param l_names Character vector of column names for L
+#' @param y_bounds A numeric vector specifying the upper and lower bound for the outcome Y.
+#' @param g_bounds A numeric vector specifying the upper and lower bound for the estimated propensity scores.
+#' @param effect_type Character string specifying the estimand to compute.
 #' @param svy_weights .
-#' @param cv_folds .
-#' @param max_iter .
-#' @param tiltmod_tol .
+#' @param cv_folds Value specifying the number of folds to be created for cross-validation.
+#' @param cv_strat Logical, indicating whether to perform stratified cross-fitting.
+#' @param strat_pmin Stratified cross-fitting will be used if the outcome prevalence is below this threshold
+#' @param max_iter Integer, maximum TMLE updating iterations
+#' @param tiltmod_tol Numeric, convergence tolerance for tilting
+#'
 #' @importFrom dplyr "%>%"
 #' @importFrom assertthat assert_that
 #' @importFrom origami make_folds cross_validate folds_vfold
@@ -737,8 +766,13 @@ est_tml_RCT <- function(
     }
 
     suppressWarnings(
-      b_tilt_fit <- glm(data[R == 1, Y] ~ 1, offset = b_prime_M_natural_logit, family = "binomial",
-                        subset = (data$A == contrast[1]), weights = weights_b_tilt) # / mean(weights_b_tilt)
+      b_tilt_fit <- glm(
+        data[R == 1, Y] ~ 1,
+        offset = b_prime_M_natural_logit,
+        family = "binomial",
+        subset = (data$A == contrast[1]),
+        weights = weights_b_tilt
+      ) # / mean(weights_b_tilt)
       #b_tilt_fit <- glm2::glm2(
       #  stats::as.formula("y_scaled ~ -1 + offset(b_prime_logit)"),
       #  data = data.table::as.data.table(list(

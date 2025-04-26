@@ -9,15 +9,17 @@ utils::globalVariables(c(
   "eif"
 ))
 
-#' Fit propensity scores for treatment contrasts
+#' Fitting models for g or h
 #'
-#' @param train_data .
-#' @param valid_data .
-#' @param contrast .
-#' @param learners .
-#' @param w_names .
-#' @param type .
-#' @param bounds .
+#' @param train_data A data.table containing the training data
+#' @param valid_data A data.table containing the validation data
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param learners \code{\link[sl3]{Stack}}, or other learner class (inheriting
+#'   from \code{\link[sl3]{Lrnr_base}}), containing a set of learners from
+#'   \pkg{sl3}
+#' @param w_names A character vector of the names of the columns of W
+#' @param type Either 'g' or 'h'
+#' @param bounds A numeric vector specifying the upper and lower bound
 #'
 #' @importFrom data.table as.data.table copy setnames ":="
 #' @importFrom sl3 sl3_Task
@@ -112,15 +114,17 @@ fit_treat_mech_RCT = function(
 }
 
 
-#' Title Fit outcome regression
+#' Fit outcome regression
 #'
-#' @param train_data .
-#' @param valid_data .
-#' @param contrast .
-#' @param learners .
-#' @param z_names .
-#' @param w_names .
-#' @param l_names .
+#' @param train_data A data.table containing the training data
+#' @param valid_data A data.table containing the validation data
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param learners \code{\link[sl3]{Stack}}, or other learner class (inheriting
+#'   from \code{\link[sl3]{Lrnr_base}}), containing a set of learners from
+#'   \pkg{sl3}
+#' @param z_names A character vector of the names of the columns of Z
+#' @param w_names A character vector of the names of the columns of W
+#' @param l_names A character vector of the names of the columns of L
 #'
 #' @importFrom data.table as.data.table copy setnames ":="
 #' @importFrom sl3 sl3_Task
@@ -238,15 +242,17 @@ fit_out_mech_RCT = function(
 }
 
 
-#' Title Fit q(M_k|a,w) & r(M_k|a,z,w)
+#' Fit q(M_k|a,w) & r(M_k|a,z,w)
 #'
-#' @param train_data .
-#' @param valid_data .
-#' @param contrast .
-#' @param learners .
-#' @param z_names .
-#' @param w_names .
-#' @param type .
+#' @param train_data A data.table containing the training data
+#' @param valid_data A data.table containing the validation data
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param learners \code{\link[sl3]{Stack}}, or other learner class (inheriting
+#'   from \code{\link[sl3]{Lrnr_base}}), containing a set of learners from
+#'   \pkg{sl3}
+#' @param z_names A character vector of the names of the columns of Z
+#' @param w_names A character vector of the names of the columns of W
+#' @param type Either 'q' or 'r'
 #'
 #' @importFrom data.table as.data.table copy setnames ":="
 #' @importFrom sl3 sl3_Task
@@ -388,7 +394,22 @@ fit_moc_mech_RCT = function(
   return(out)
 }
 
-
+#' Fitting models for u
+#'
+#' @param train_data A data.table containing the training data
+#' @param valid_data A data.table containing the validation data
+#' @param learners \code{\link[sl3]{Stack}}, or other learner class (inheriting
+#'   from \code{\link[sl3]{Lrnr_base}}), containing a set of learners from
+#'   \pkg{sl3}
+#' @param b_out Results from outcome regression
+#' @param q_out Results from regression model for estimating q
+#' @param r_out Results from regression model for estimating r
+#' @param g_out Results from regression model for estimating g
+#' @param h_out Results from regression model for estimating h
+#' @param w_names A character vector of the names of the columns of W
+#'
+#' @importFrom data.table as.data.table copy setnames ":="
+#' @importFrom sl3 sl3_Task
 fit_nuisance_u_RCT = function(
   train_data,
   valid_data,
@@ -472,7 +493,24 @@ fit_nuisance_u_RCT = function(
   ))
 }
 
-
+#' Fitting models for v
+#'
+#' @param train_data A data.table containing the training data
+#' @param valid_data A data.table containing the validation data
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param learners \code{\link[sl3]{Stack}}, or other learner class (inheriting
+#'   from \code{\link[sl3]{Lrnr_base}}), containing a set of learners from
+#'   \pkg{sl3}
+#' @param b_out Results from outcome regression
+#' @param q_out Results from regression model for estimating q
+#' @param r_out Results from regression model for estimating r
+#' @param z_names A character vector of the names of the columns of Z
+#' @param w_names A character vector of the names of the columns of W
+#' @param effect_type Specifying the estimand
+#'
+#' @importFrom data.table as.data.table copy setnames ":="
+#' @importFrom sl3 sl3_Task
+#' @importFrom stats glm
 fit_nuisance_v_RCT = function(
   train_data,
   valid_data,
@@ -585,7 +623,7 @@ fit_nuisance_v_RCT = function(
         covariates = c("A", w_names),
         outcome = "V_pseudo",
         outcome_type = "continuous"
-     )
+      )
     )
     v_param_fit <- learners$train(v_task_train)
     v_valid_pred <- v_param_fit$predict(v_task_valid)
@@ -636,7 +674,6 @@ fit_nuisance_v_RCT = function(
       )
     )
     v_param_fit <- learners$train(v_task_train)
-
 
     v_data_valid <- data.table::as.data.table(cbind(
       valid_data[, ..var_names],
@@ -698,7 +735,21 @@ fit_nuisance_v_RCT = function(
   }
 }
 
-
+#' Fitting models for l
+#'
+#' @param train_data A data.table containing the training data
+#' @param valid_data A data.table containing the validation data
+#' @param contrast Numeric vector of length 2 giving treatment contrast (e.g. c(1,0)).
+#' @param learners \code{\link[sl3]{Stack}}, or other learner class (inheriting
+#'   from \code{\link[sl3]{Lrnr_base}}), containing a set of learners from
+#'   \pkg{sl3}
+#' @param b_out Results from outcome regression
+#' @param z_names A character vector of the names of the columns of Z
+#' @param w_names A character vector of the names of the columns of W
+#' @param effect_type Specifying the estimand
+#'
+#' @importFrom data.table as.data.table copy setnames ":="
+#' @importFrom sl3 sl3_Task
 fit_nuisance_l_RCT = function(
   train_data,
   valid_data,
