@@ -25,6 +25,7 @@ utils::globalVariables(c("..w_names", "A", "M", "Y", "R", "v_prime"))
 #' @param l_names Character vector of column names for L
 #' @param w_names Character vector of column names for W
 #' @param z_names Character vector of column names for Z
+#' @param partial Logical, indicating whether to compute the partial TMLE for the shift_k_order estimand.
 #' @param g_bounds A numeric vector specifying the upper and lower bound for the estimated propensity scores.
 #'
 #' @importFrom assertthat assert_that
@@ -44,6 +45,7 @@ cv_eif_RCT = function(
   v_learners,
   d_learners,
   l_learners,
+  partial = FALSE,
   effect_type = c("shift_k", "shift_k_order", "Y_1"),
   w_names,
   z_names,
@@ -88,6 +90,7 @@ cv_eif_RCT = function(
     z_names = z_names,
     l_names = l_names
   )
+
   if (effect_type == "Y_1") {
     q_learners <- sl3::Lrnr_mean$new()
   }
@@ -114,11 +117,16 @@ cv_eif_RCT = function(
     type = "r"
   )
 
-  b_prime <- b_out$b_est_valid$b_pred_A_prime
   h_star <- h_out$treat_est_valid$treat_pred_A_star
   g_star <- g_out$treat_est_valid$treat_pred_A_star[valid_data$R == 1]
   h_prime <- h_out$treat_est_valid$treat_pred_A_prime
   g_prime <- g_out$treat_est_valid$treat_pred_A_prime[valid_data$R == 1]
+
+  # IPW
+  ipw_a_prime <- as.numeric(valid_data[R == 1, A] == contrast[1]) / g_prime
+  ipw_a_star <- as.numeric(valid_data[R == 1, A] == contrast[2]) / g_star
+
+  b_prime <- b_out$b_est_valid$b_pred_A_prime
 
   q_star_M_one <- q_out$moc_est_valid_M_one$moc_pred_A_star[valid_data$R == 1]
   r_prime_M_one <- r_out$moc_est_valid_M_one$moc_pred_A_prime
@@ -126,6 +134,29 @@ cv_eif_RCT = function(
     valid_data$R == 1
   ]
   r_prime_M_natural <- r_out$moc_est_valid_M_natural$moc_pred_A_prime
+
+  # q(m_k|a^star)/r(m_k|a^prime)
+  c_star <- (q_star_M_natural / r_prime_M_natural)
+
+  # TMLE update for Y-component only
+  if (partial) {
+    b_prime_init <- b_prime
+    hy <- ipw_a_prime * c_star
+    hy_norm <- hy / mean(hy)
+    eps_bound <- 1e-6
+    b_prime_init <- pmin(pmax(b_prime_init, eps_bound), 1 - eps_bound)
+
+    fit_fluct <- glm(
+      valid_data[R == 1, Y] ~ 1,
+      offset = qlogis(b_prime_init),
+      family = "binomial",
+      weights = hy_norm
+    )
+
+    eps <- coef(fit_fluct)[1]
+    b_prime <- plogis(qlogis(b_prime_init) + eps)
+    b_out$b_est_valid$b_pred_A_prime <- b_prime
+  }
 
   # set A in the validation data.
   valid_data_a_prime <- data.table::copy(valid_data)[, `:=`(A, contrast[1])]
@@ -177,10 +208,6 @@ cv_eif_RCT = function(
     return(out_valid)
   })
   u_int_eif <- do.call(`-`, u_int_eif)
-
-  # IPW
-  ipw_a_prime <- as.numeric(valid_data[R == 1, A] == contrast[1]) / g_prime
-  ipw_a_star <- as.numeric(valid_data[R == 1, A] == contrast[2]) / g_star
 
   # q(m_k|a^star)/r(m_k|a^prime)
   c_star <- (q_star_M_natural / r_prime_M_natural)
@@ -317,6 +344,7 @@ cv_eif_RCT = function(
 #' @param cv_folds Value specifying the number of folds to be created for cross-validation.
 #' @param cv_strat Logical, indicating whether to perform stratified cross-fitting.
 #' @param strat_pmin Stratified cross-fitting will be used if the outcome prevalence is below this threshold
+#' @param partial Logical, indicating whether to compute the partial TMLE for the shift_k_order estimand.
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom stats var weighted.mean
@@ -337,6 +365,7 @@ est_onestep_RCT = function(
   z_names,
   l_names,
   y_bounds,
+  partial = FALSE,
   g_bounds = c(0.005, 0.995),
   effect_type = c("shift_k", "shift_k_order", "Y_1"),
   svy_weights = NULL,
@@ -385,6 +414,7 @@ est_onestep_RCT = function(
     z_names = z_names,
     l_names = l_names,
     g_bounds = g_bounds,
+    partial = partial,
     use_future = FALSE,
     .combine = FALSE
   )

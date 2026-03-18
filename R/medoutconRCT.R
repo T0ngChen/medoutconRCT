@@ -202,7 +202,14 @@ medoutconRCT = function(
         list(tmle_est_args, est_args_tmle),
         recursive = FALSE
       )
-      est_out <- do.call(est_tml_RCT, tmle_est_args)
+      if (effect_type == "shift_k") {
+        est_out <- do.call(est_tml_RCT, tmle_est_args)
+      } else if (effect_type == "shift_k_order") {
+        tmle_est_args = c(tmle_est_args, list(partial = TRUE))
+        tmle_est_args$max_iter = NULL
+        tmle_est_args$tiltmod_tol = NULL
+        est_out <- do.call(est_onestep_RCT, tmle_est_args)
+      }
     }
     est_out$outcome <- as.numeric(Y)
     class(est_out) <- "medoutconRCT"
