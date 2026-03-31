@@ -157,8 +157,38 @@ cv_eif_RCT = function(
     b_prime <- plogis(qlogis(b_prime_init) + eps)
     b_out$b_est_valid$b_pred_A_prime <- b_prime
 
+    # training
+
+    b_prime_init_train <- b_out$b_est_train$b_pred_A_prime
+    g_prime_train <- g_out$treat_est_train$treat_pred_A_prime[train_data$R == 1]
+    ipw_a_prime_train <- as.numeric(train_data[R == 1, A] == contrast[1]) /
+      g_prime_train
+
+    q_star_M_natural_train <- q_out$moc_est_train_M_natural$moc_pred_A_star[
+      train_data$R == 1
+    ]
+    r_prime_M_natural_train <- r_out$moc_est_train_M_natural$moc_pred_A_prime
+
+    c_star_train <- (q_star_M_natural_train / r_prime_M_natural_train)
+    hy_trian <- ipw_a_prime_train * c_star_train
+    hy_norm_train <- hy_trian / mean(hy_trian)
+    eps_bound <- 1e-6
+    b_prime_init_train <- pmin(
+      pmax(b_prime_init_train, eps_bound),
+      1 - eps_bound
+    )
+
+    fit_fluct_train <- glm(
+      train_data[R == 1, Y] ~ 1,
+      offset = qlogis(b_prime_init_train),
+      family = "binomial",
+      weights = hy_norm_train
+    )
+
+    eps_train <- coef(fit_fluct_train)[1]
+
     b_out$b_est_train$b_pred_A_prime = plogis(
-      qlogis(b_out$b_est_train$b_pred_A_prime) + eps
+      qlogis(b_out$b_est_train$b_pred_A_prime) + eps_train
     )
   }
 
