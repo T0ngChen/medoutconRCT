@@ -170,7 +170,7 @@ cv_eif_RCT = function(
     r_prime_M_natural_train <- r_out$moc_est_train_M_natural$moc_pred_A_prime
 
     c_star_train <- (q_star_M_natural_train / r_prime_M_natural_train)
-    hy_trian <- ipw_a_prime_train * c_star_train
+    hy_train <- ipw_a_prime_train * c_star_train
     hy_norm_train <- hy_trian / mean(hy_trian)
     eps_bound <- 1e-6
     b_prime_init_train <- pmin(
