@@ -155,6 +155,11 @@ cv_eif_RCT = function(
 
     eps <- coef(fit_fluct)[1]
     b_prime <- plogis(qlogis(b_prime_init) + eps)
+    b_out$b_est_valid$b_pred_A_prime <- b_prime
+
+    b_out$b_est_train$b_pred_A_prime = plogis(
+      qlogis(b_out$b_est_train$b_pred_A_prime) + eps
+    )
   }
 
   # set A in the validation data.
